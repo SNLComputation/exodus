@@ -210,16 +210,16 @@ else()
 endif()
 target_link_libraries(exodus PUBLIC MPI::MPI_C)
 
-install(TARGETS exodus EXPORT exodus_targets)
-configure_file(exodus_config.cmake.in
-  "${PROJECT_BINARY_DIR}/exodus_config.cmake" @ONLY)
-configure_file(exodus_config_version.cmake.in
-  "${PROJECT_BINARY_DIR}/exodus_config_version.cmake" @ONLY)
+install(TARGETS exodus EXPORT exodus-targets)
+configure_file(exodus-config.cmake.in
+  "${PROJECT_BINARY_DIR}/exodus-config.cmake" @ONLY)
+configure_file(exodus-config-version.cmake.in
+  "${PROJECT_BINARY_DIR}/exodus-config-version.cmake" @ONLY)
 
 install(FILES
-  "${PROJECT_BINARY_DIR}/exodus_config.cmake"
-  "${PROJECT_BINARY_DIR}/exodus_config_version.cmake"
+  "${PROJECT_BINARY_DIR}/exodus-config.cmake"
+  "${PROJECT_BINARY_DIR}/exodus-config-version.cmake"
   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-install(EXPORT exodus_targets
+install(EXPORT exodus-targets
   DESTINATION "${INSTALL_CMAKE_DIR}")

@@ -3,5 +3,5 @@ get_filename_component(exodus_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 # Our library dependencies (contains definitions for IMPORTED targets)
 if(NOT TARGET exodus AND NOT exodus_BINARY_DIR)
-  include("${exodus_CMAKE_DIR}/exodus_targets.cmake")
+  include("${exodus_CMAKE_DIR}/exodus-targets.cmake")
 endif()
