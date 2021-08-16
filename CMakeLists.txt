@@ -2,15 +2,12 @@ cmake_minimum_required(VERSION 3.12.0...3.21.0)
 
 project(exodus VERSION 8.9.0 LANGUAGES C)
 
-if(WIN32 AND NOT CYGWIN)
-  set(INSTALL_CMAKE_DIR CMake)
-else()
-  set(INSTALL_CMAKE_DIR lib/cmake/${PROJECT_NAME})
-endif()
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 find_package(MPI REQUIRED)
-find_package(HDF5 CONFIG)
-find_package(netCDF REQUIRED)
+find_package(hdf5 CONFIG REQUIRED)
+find_package(netCDF CONFIG REQUIRED)
 
 set(EXODUS_SOURCES
   src/ex__put_homogenous_block_params.c
@@ -200,26 +197,37 @@ add_library(exodus ${EXODUS_SOURCES})
 set_target_properties(exodus PROPERTIES
   PUBLIC_HEADER "${EXODUS_HEADERS}")
 target_include_directories(exodus
-  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_include_directories(exodus
-  INTERFACE $<INSTALL_INTERFACE:include>)
-if(TARGET netCDF::netcdf)
-  target_link_libraries(exodus PRIVATE netCDF::netcdf)
-else()
-  target_link_libraries(exodus PRIVATE netcdf)
-endif()
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+  )
+target_link_libraries(exodus PUBLIC netCDF::netcdf)
 target_link_libraries(exodus PUBLIC MPI::MPI_C)
 
-install(TARGETS exodus EXPORT exodus-targets)
-configure_file(exodus-config.cmake.in
-  "${PROJECT_BINARY_DIR}/exodus-config.cmake" @ONLY)
-configure_file(exodus-config-version.cmake.in
-  "${PROJECT_BINARY_DIR}/exodus-config-version.cmake" @ONLY)
+install(
+  TARGETS exodus
+  EXPORT exodus-targets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/exodus-config.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/exodus
+)
+write_basic_package_version_file(
+  "${PROJECT_BINARY_DIR}/exodus-config-version.cmake"
+  COMPATIBILITY AnyNewerVersion)
 
 install(FILES
   "${PROJECT_BINARY_DIR}/exodus-config.cmake"
   "${PROJECT_BINARY_DIR}/exodus-config-version.cmake"
-  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/exodus)
 
-install(EXPORT exodus-targets
-  DESTINATION "${INSTALL_CMAKE_DIR}")
+install(
+  EXPORT exodus-targets
+  NAMESPACE exodus::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/exodus)
